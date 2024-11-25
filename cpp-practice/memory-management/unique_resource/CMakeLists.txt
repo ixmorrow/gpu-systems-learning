@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
-project(unique_resource VERSION 0.1.0)
+project(unique_resource)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add Google Test
+# Include Google Test for testing
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -13,16 +13,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# Create library
-add_library(unique_resource INTERFACE)
-target_include_directories(unique_resource INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
+# Add the include directory
+include_directories(include)
 
-# Add tests
+# Enable testing
 enable_testing()
 add_subdirectory(tests)
-
-# Add examples
-add_subdirectory(examples)

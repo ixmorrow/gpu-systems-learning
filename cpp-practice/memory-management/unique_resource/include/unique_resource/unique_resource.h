@@ -5,17 +5,23 @@ class UniqueResource
 {
 private:
     // Add your member variables here
+    T *ptr;
 
 public:
     // Constructor
-    explicit UniqueResource(/* What parameters might you need? */);
+    explicit UniqueResource(T *obj = nullptr) : ptr(obj) {};
 
     // Destructor
-    ~UniqueResource();
+    ~UniqueResource() noexcept
+    {
+        delete ptr;
+    };
 
     // Copy constructor and assignment - think about what you should do with these
-    UniqueResource(const UniqueResource &);
-    UniqueResource &operator=(const UniqueResource &);
+    // Want to disable copying in this class because it is meant to be Unique.
+    // If we copied pointer addr from A to B and A destructor deleter ptr, that would B with a dangling ptr.
+    UniqueResource(const UniqueResource &) = delete;
+    UniqueResource &operator=(const UniqueResource &) = delete;
 
     // Move constructor and assignment
     UniqueResource(UniqueResource &&) noexcept;
