@@ -1,5 +1,3 @@
-# gpu-systems-learning
-
 # GPU Systems Learning
 
 ## Overview
