@@ -129,6 +129,33 @@ public:
         return result;
     }
 
+    void T()
+    {
+        // create temporary matrix data
+        UniqueResource<float> temp{new float[num_cols * num_rows], true};
+
+        // load matric pointers
+        auto *original_matrix = data.get();
+        auto *new_matrix = temp.get();
+
+        for (int i = 0; i < num_rows; ++i)
+        {
+            for (int j = 0; j < num_cols; ++j)
+            {
+                size_t new_row = j;
+                size_t new_col = i;
+                size_t original_index = _row_major_index(i, j);
+                size_t new_index = _row_major_index(new_row, new_col);
+
+                new_matrix[new_index] = original_matrix[original_index];
+            }
+        }
+
+        // move ownership of temp resources to data
+        // data now holds Transposed matrix!
+        data = std::move(temp);
+    }
+
     void print()
     {
         for (int i = 0; i < num_rows; ++i)
@@ -196,6 +223,13 @@ int main()
     // test Matrix addition
     Matrix C = A + B;
     cout << "Result of Matrix Addition (A+B)" << endl;
+    C.print();
+
+    cout << "-------------------------------" << endl;
+
+    // Transpose matrix C
+    C.T();
+    cout << "Transpose of Matrix C:" << endl;
     C.print();
 
     return 0;
