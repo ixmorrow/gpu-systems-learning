@@ -8,8 +8,42 @@ public:
     explicit TestStruct(int v) : value(v) {}
 };
 
+class MemoryTestClass
+{
+public:
+    static int constructor_calls;
+    static int destructor_calls;
+
+    explicit MemoryTestClass(int val = 0) : value(val)
+    {
+        constructor_calls++;
+    }
+
+    ~MemoryTestClass()
+    {
+        destructor_calls++;
+    }
+
+    int value;
+};
+
+// Reset counters before each test
+class UniqueResourceTest : public ::testing::Test
+{
+protected:
+    void SetUp() override
+    {
+        MemoryTestClass::constructor_calls = 0;
+        MemoryTestClass::destructor_calls = 0;
+    }
+};
+
+// Initialize static counters
+int MemoryTestClass::constructor_calls = 0;
+int MemoryTestClass::destructor_calls = 0;
+
 // Basic Construction/Destruction
-TEST(UniqueResourceTest, DefaultConstruction)
+TEST_F(UniqueResourceTest, DefaultConstruction)
 {
     // Test default construction
     UniqueResource<TestStruct> uniq_ptr;
@@ -17,7 +51,7 @@ TEST(UniqueResourceTest, DefaultConstruction)
     ASSERT_EQ(nullptr, uniq_ptr.get());
 }
 
-TEST(UniqueResourceTest, ConstructWithPointer)
+TEST_F(UniqueResourceTest, ConstructWithPointer)
 {
     // Test construction with a pointer
     TestStruct *p = new TestStruct(15);
@@ -28,7 +62,7 @@ TEST(UniqueResourceTest, ConstructWithPointer)
     ASSERT_EQ(15, (*uniq_ptr).value);
 }
 
-TEST(UniqueResourceTest, MoveConstruction)
+TEST_F(UniqueResourceTest, MoveConstruction)
 {
     UniqueResource<TestStruct> original(new TestStruct(42));
     TestStruct *original_ptr = original.get();
@@ -40,7 +74,7 @@ TEST(UniqueResourceTest, MoveConstruction)
     ASSERT_EQ(42, moved->value);          // Data should be accessible
 }
 
-TEST(UniqueResourceTest, MoveAssignment)
+TEST_F(UniqueResourceTest, MoveAssignment)
 {
     // Test move assignment
     UniqueResource<TestStruct> original(new TestStruct(67));
@@ -53,7 +87,7 @@ TEST(UniqueResourceTest, MoveAssignment)
 }
 
 // Resource Access
-TEST(UniqueResourceTest, GetAccessor)
+TEST_F(UniqueResourceTest, GetAccessor)
 {
     // Test get() method
     TestStruct *p = new TestStruct(17);
@@ -63,7 +97,7 @@ TEST(UniqueResourceTest, GetAccessor)
     ASSERT_EQ(17, (*uniq_ptr).value);
 }
 
-TEST(UniqueResourceTest, DereferenceOperator)
+TEST_F(UniqueResourceTest, DereferenceOperator)
 {
     // Test operator*
     TestStruct *p = new TestStruct(42);
@@ -72,7 +106,7 @@ TEST(UniqueResourceTest, DereferenceOperator)
     ASSERT_EQ(42, (*uniq_ptr).value);
 }
 
-TEST(UniqueResourceTest, ArrowOperator)
+TEST_F(UniqueResourceTest, ArrowOperator)
 {
     // Test operator->
     TestStruct *p = new TestStruct(5);
@@ -81,10 +115,32 @@ TEST(UniqueResourceTest, ArrowOperator)
     ASSERT_EQ(5, uniq_ptr->value);
 }
 
-// // Memory Management
-// TEST(UniqueResourceTest, ResourceDeletion) {
-//     // Test that resources are properly deleted
-// }
+// Memory Management
+TEST_F(UniqueResourceTest, ResourceDeletion)
+{
+    // Test that resources are properly deleted
+    {
+        UniqueResource<MemoryTestClass> uniq_ptr(new MemoryTestClass(75));
+        EXPECT_EQ(MemoryTestClass::constructor_calls, 1);
+        EXPECT_EQ(MemoryTestClass::destructor_calls, 0);
+    } // ptr goes out of scope here
+    EXPECT_EQ(MemoryTestClass::destructor_calls, 1);
+}
+
+TEST_F(UniqueResourceTest, MoveConstructionMemoryManagment)
+{
+    {
+        UniqueResource<MemoryTestClass> original(new MemoryTestClass(75));
+        EXPECT_EQ(MemoryTestClass::constructor_calls, 1);
+        EXPECT_EQ(MemoryTestClass::destructor_calls, 0);
+        {
+            UniqueResource<MemoryTestClass> moved(std::move(original));
+            EXPECT_EQ(MemoryTestClass::constructor_calls, 1);
+        } // moved goes out of scope, destructor called
+        EXPECT_EQ(MemoryTestClass::destructor_calls, 1);
+    } // original goes out of scope, but destructor is not called
+    EXPECT_EQ(MemoryTestClass::destructor_calls, 1);
+}
 
 // // Edge Cases
 // TEST(UniqueResourceTest, NullPointerHandling) {
