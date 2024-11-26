@@ -6,15 +6,21 @@ class UniqueResource
 private:
     // Add your member variables here
     T *ptr;
+    bool is_array;
 
 public:
     // Constructor
-    explicit UniqueResource(T *obj = nullptr) : ptr(obj) {};
+    explicit UniqueResource(T *obj = nullptr) : ptr(obj), is_array(false) {};
+    // Constructor for arrays
+    UniqueResource(T *obj, bool array_flag) : ptr(obj), is_array(array_flag) {}
 
     // Destructor
     ~UniqueResource() noexcept
     {
-        delete ptr;
+        if (is_array)
+            delete[] ptr;
+        else:
+            delete ptr;
     };
 
     // Copy constructor and assignment - think about what you should do with these
@@ -35,7 +41,10 @@ public:
         if (this != other)
         {
             // delete existing data on this object
-            delete ptr;
+            if (is_array)
+                delete[] ptr;
+            else:
+                delete ptr;
             // assign ptr address from other to this object
             ptr = other.ptr;
             // set other ptr address to a default value of nullptr
