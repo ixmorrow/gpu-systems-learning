@@ -154,6 +154,7 @@ public:
         // move ownership of temp resources to data
         // data now holds Transposed matrix!
         data = std::move(temp);
+        std::swap(num_rows, num_cols);
     }
 
     void print()
