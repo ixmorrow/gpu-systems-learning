@@ -102,7 +102,7 @@ Month 6: Production ML Systems
 - [x] Learning plan development
 - [x] C++ refresher on Exercism
 - [x] Initial chapters of "A Tour of C++"
-- [ ] Smart pointer implementation
+- [x] Smart pointer implementation
 - [ ] Basic CUDA setup
 - [ ] ...
 
