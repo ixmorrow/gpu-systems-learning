@@ -24,11 +24,40 @@ public:
     UniqueResource &operator=(const UniqueResource &) = delete;
 
     // Move constructor and assignment
-    UniqueResource(UniqueResource &&) noexcept;
-    UniqueResource &operator=(UniqueResource &&) noexcept;
+    UniqueResource(UniqueResource &&other) noexcept : ptr(other.ptr)
+    {
+        other.ptr = nullptr;
+    }
+
+    UniqueResource &operator=(UniqueResource &&other) noexcept
+    {
+        // check not assigning to self
+        if (this != other)
+        {
+            // delete existing data on this object
+            delete ptr;
+            // assign ptr address from other to this object
+            ptr = other.ptr;
+            // set other ptr address to a default value of nullptr
+            other.ptr = nullptr;
+        }
+
+        return *this;
+    }
 
     // Resource access
-    T *get() const;
-    T &operator*() const;
-    T *operator->() const;
+    T *get() const
+    {
+        return ptr;
+    }
+
+    T &operator*() const
+    {
+        return *ptr;
+    }
+
+    T *operator->() const
+    {
+        return ptr;
+    }
 };
