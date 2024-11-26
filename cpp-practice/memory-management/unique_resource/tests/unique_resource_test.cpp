@@ -141,8 +141,3 @@ TEST_F(UniqueResourceTest, MoveConstructionMemoryManagment)
     } // original goes out of scope, but destructor is not called
     EXPECT_EQ(MemoryTestClass::destructor_calls, 1);
 }
-
-// // Edge Cases
-// TEST(UniqueResourceTest, NullPointerHandling) {
-//     // Test handling of nullptr
-// }
