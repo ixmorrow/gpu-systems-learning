@@ -19,7 +19,7 @@ public:
     {
         if (is_array)
             delete[] ptr;
-        else:
+        else
             delete ptr;
     };
 
@@ -38,12 +38,12 @@ public:
     UniqueResource &operator=(UniqueResource &&other) noexcept
     {
         // check not assigning to self
-        if (this != other)
+        if (*this != other)
         {
             // delete existing data on this object
             if (is_array)
                 delete[] ptr;
-            else:
+            else
                 delete ptr;
             // assign ptr address from other to this object
             ptr = other.ptr;
@@ -52,6 +52,16 @@ public:
         }
 
         return *this;
+    }
+
+    bool operator==(UniqueResource const &other) noexcept
+    {
+        return ptr == other.get();
+    }
+
+    bool operator!=(UniqueResource const &other) noexcept
+    {
+        return !(*this == other);
     }
 
     // Resource access

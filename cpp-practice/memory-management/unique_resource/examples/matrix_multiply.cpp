@@ -1,8 +1,28 @@
 #include "unique_resource/unique_resource.h"
 #include <cstddef>
 #include <stdexcept>
+#include <random>
+#include <iostream>
 
 using namespace std;
+class NullPtrMatrix : public exception
+{
+public:
+    const char *what() const throw()
+    {
+        return "Retrieved a matrix that is a nullptr!";
+    }
+};
+
+class IncompatibleMatricesForOperation : public exception
+{
+public:
+    const char *what() const throw()
+    {
+        return "Attempted a matrix operatioin with two matrices with incompatble dimensions.";
+    }
+};
+
 class Matrix
 {
 public:
@@ -11,9 +31,10 @@ public:
     UniqueResource<float> data;
 
     // Constructors and destructor
-    Matrix() : num_rows(0), num_cols(0) {};
-    Matrix(size_t x, size_t y) : num_rows(x), num_cols(y) {};
-    Matrix(float *initial_data) : data(initial_data) {};
+    Matrix() : num_rows(0), num_cols(0), data(nullptr) {};
+    Matrix(size_t x, size_t y) : num_rows(x), num_cols(y), data(new float[x * y], true) {};
+    Matrix(size_t x, size_t y, float *initial_data)
+        : num_rows(x), num_cols(y), data(initial_data, true) {};
 
     ~Matrix() {};
 
@@ -84,21 +105,39 @@ public:
         data = std::move(temp);
     }
 
-    void add(Matrix &other)
-    // Adds other matrix to this matrix
+    Matrix operator+(Matrix const &other)
     {
         if (num_rows != other.num_rows || num_cols != other.num_cols)
         {
             throw IncompatibleMatricesForOperation();
         }
-        for (int i; i < num_rows; ++i)
+
+        Matrix result(num_rows, num_cols, new float[num_rows * num_cols]);
+
+        for (int i = 0; i < num_rows; ++i)
         {
-            for (int j; j < num_cols; ++j)
+            for (int j = 0; j < num_cols; ++j)
             {
-                float a = get(i, j);
-                float b = other.get(i, j);
-                set(i, j, a + b);
+                size_t global_index = _row_major_index(i, j);
+                auto *matrix = data.get();
+                auto *other_matrix = other.data.get();
+                auto *result_matrix = result.data.get();
+                result_matrix[global_index] = matrix[global_index] + other_matrix[global_index];
             }
+        }
+
+        return result;
+    }
+
+    void print()
+    {
+        for (int i = 0; i < num_rows; ++i)
+        {
+            for (int j = 0; j < num_cols; ++j)
+            {
+                cout << get(i, j) << " ";
+            }
+            cout << endl;
         }
     }
 
@@ -121,20 +160,43 @@ private:
     }
 };
 
-class NullPtrMatrix : public exception
+int main()
 {
-public:
-    const char *what() const throw()
-    {
-        return "Retrieved a matrix that is a nullptr!";
-    }
-};
+    // create 10x10 matrix
+    size_t x = 10;
+    size_t y = 10;
+    float *array_a = new float[x * y];
+    float *array_b = new float[x * y];
 
-class IncompatibleMatricesForOperation : public exception
-{
-public:
-    const char *what() const throw()
+    // Create a random number generator
+    std::random_device rd;                               // Seed for randomness
+    std::mt19937 gen(rd());                              // Mersenne Twister engine
+    std::uniform_real_distribution<float> dis(0.0, 1.0); // Range [0.0, 1.0]
+
+    for (int i = 0; i < (x * y); ++i)
     {
-        return "Attempted a matrix operatioin with two matrices with incompatble dimensions.";
+        array_a[i] = dis(gen);
+        array_b[i] = dis(gen);
     }
-};
+    cout << "Initialized random arrays of size: " << x * y << endl;
+
+    // create matrix A
+    Matrix A{x, y, array_a};
+    cout << "Matrix A: " << endl;
+    A.print();
+
+    cout << "-------------------------------" << endl;
+
+    // create matrix B
+    Matrix B{x, y, array_b};
+    cout << "Matrix B: " << endl;
+    B.print();
+    cout << "-------------------------------" << endl;
+
+    // test Matrix addition
+    Matrix C = A + B;
+    cout << "Result of Matrix Addition (A+B)" << endl;
+    C.print();
+
+    return 0;
+}
