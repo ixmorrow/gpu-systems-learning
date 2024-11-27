@@ -182,7 +182,7 @@ Weekend:
 - [x] First C++ project: UniqueResource implementation
 
 ### In Progress
-- [ ] Current project details
+- [ ] Memory Leak Detector
 - [ ] Current learning focus
 
 ### Next Steps
