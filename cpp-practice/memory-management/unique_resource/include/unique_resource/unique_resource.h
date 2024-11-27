@@ -1,4 +1,6 @@
 #pragma once
+#include <cstddef>
+#include <stdexcept>
 
 template <typename T>
 class UniqueResource
@@ -38,7 +40,7 @@ public:
     UniqueResource &operator=(UniqueResource &&other) noexcept
     {
         // check not assigning to self
-        if (*this != other)
+        if (this != &other)
         {
             // delete existing data on this object
             if (is_array)
@@ -62,6 +64,26 @@ public:
     bool operator!=(UniqueResource const &other) noexcept
     {
         return !(*this == other);
+    }
+
+    // Non-const version for modifiable access
+    T &operator[](std::size_t index)
+    {
+        if (!ptr)
+        {
+            throw std::runtime_error("Not an array resource.");
+        }
+        return ptr[index];
+    }
+
+    // Const version for read-only access
+    const T &operator[](std::size_t index) const
+    {
+        if (!ptr)
+        {
+            throw std::runtime_error("Null pointer access");
+        }
+        return ptr[index];
     }
 
     // Resource access

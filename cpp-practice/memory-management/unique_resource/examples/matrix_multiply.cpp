@@ -68,8 +68,7 @@ public:
         if (x < num_rows && x >= 0 && y < num_cols && y >= 0 && _validate_matrix())
         {
             int i = _row_major_index(x, y);
-            auto *matrix = data.get();
-            return matrix[i];
+            return data[i];
         }
         else
         {
@@ -82,8 +81,7 @@ public:
         if (x < num_rows && x >= 0 && y < num_cols && y >= 0 && _validate_matrix())
         {
             size_t index = _row_major_index(x, y);
-            auto *matrix = data.get();
-            matrix[index] = i;
+            data[index] = i;
         }
         else
         {
@@ -119,10 +117,7 @@ public:
             for (int j = 0; j < num_cols; ++j)
             {
                 size_t global_index = _row_major_index(i, j);
-                auto *matrix = data.get();
-                auto *other_matrix = other.data.get();
-                auto *result_matrix = result.data.get();
-                result_matrix[global_index] = matrix[global_index] + other_matrix[global_index];
+                result.data[global_index] = data[global_index] + other.data[global_index];
             }
         }
 
@@ -139,11 +134,6 @@ public:
         // create temporary matrix data
         Matrix result{num_rows, other.num_cols, new float[num_rows * other.num_cols]};
 
-        // load matrix pointers
-        auto *matrix = data.get();
-        auto *other_matrix = other.data.get();
-        auto *result_matrix = result.data.get();
-
         for (int i = 0; i < num_rows; ++i) // Iterate over rows of first matrix
         {
             for (int j = 0; j < other.num_cols; ++j) // Iterates over cols of second matrix
@@ -152,9 +142,9 @@ public:
                 for (int k = 0; k < num_cols; ++k) // Iterates over cols of first matrix
                 // Computes dot product of ith row of 1st matrix and jth col of 2nd matrix
                 {
-                    value += matrix[i * num_cols + k] * other_matrix[k * other.num_cols + j];
+                    value += data[i * num_cols + k] * other.data[k * other.num_cols + j];
                 }
-                result_matrix[i * num_cols + j] = value;
+                result.data[i * num_cols + j] = value;
             }
         }
 
@@ -166,10 +156,6 @@ public:
         // create temporary matrix data
         UniqueResource<float> temp{new float[num_cols * num_rows], true};
 
-        // load matrix pointers
-        auto *original_matrix = data.get();
-        auto *new_matrix = temp.get();
-
         for (int i = 0; i < num_rows; ++i)
         {
             for (int j = 0; j < num_cols; ++j)
@@ -179,7 +165,7 @@ public:
                 size_t original_index = _row_major_index(i, j);
                 size_t new_index = _row_major_index(new_row, new_col);
 
-                new_matrix[new_index] = original_matrix[original_index];
+                temp[new_index] = data[original_index];
             }
         }
 
@@ -219,6 +205,16 @@ private:
         return true;
     }
 };
+
+Matrix build_matrix(size_t rows, size_t cols)
+{
+    Matrix m;
+    m.num_rows = rows;
+    m.num_cols = cols;
+    m.data = UniqueResource<float>(new float[rows * cols]);
+
+    return m;
+}
 
 int main()
 {
