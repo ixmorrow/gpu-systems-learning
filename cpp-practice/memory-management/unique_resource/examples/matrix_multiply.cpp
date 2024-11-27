@@ -44,6 +44,16 @@ public:
         data = std::move(other.data);
     }
 
+    static Matrix build_matrix(size_t rows, size_t cols)
+    {
+        Matrix m;
+        m.num_rows = rows;
+        m.num_cols = cols;
+        m.data = UniqueResource<float>(new float[rows * cols]);
+
+        return m;
+    }
+
     // Move assignment
     Matrix &operator=(Matrix &&other) noexcept
     {
@@ -110,7 +120,7 @@ public:
             throw IncompatibleMatricesForOperation();
         }
 
-        Matrix result(num_rows, num_cols, new float[num_rows * num_cols]);
+        Matrix result = build_matrix(num_rows, num_cols);
 
         for (int i = 0; i < num_rows; ++i)
         {
@@ -132,7 +142,7 @@ public:
         }
 
         // create temporary matrix data
-        Matrix result{num_rows, other.num_cols, new float[num_rows * other.num_cols]};
+        Matrix result = build_matrix(num_rows, other.num_cols);
 
         for (int i = 0; i < num_rows; ++i) // Iterate over rows of first matrix
         {
@@ -205,16 +215,6 @@ private:
         return true;
     }
 };
-
-Matrix build_matrix(size_t rows, size_t cols)
-{
-    Matrix m;
-    m.num_rows = rows;
-    m.num_cols = cols;
-    m.data = UniqueResource<float>(new float[rows * cols]);
-
-    return m;
-}
 
 int main()
 {
