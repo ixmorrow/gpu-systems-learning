@@ -129,12 +129,44 @@ public:
         return result;
     }
 
+    Matrix operator*(Matrix const &other)
+    {
+        if (num_cols != other.num_rows)
+        {
+            throw IncompatibleMatricesForOperation();
+        }
+
+        // create temporary matrix data
+        Matrix result{num_rows, other.num_cols, new float[num_rows * other.num_cols]};
+
+        // load matrix pointers
+        auto *matrix = data.get();
+        auto *other_matrix = other.data.get();
+        auto *result_matrix = result.data.get();
+
+        for (int i = 0; i < num_rows; ++i) // Iterate over rows of first matrix
+        {
+            for (int j = 0; j < other.num_cols; ++j) // Iterates over cols of second matrix
+            {
+                float value = 0.0;
+                for (int k = 0; k < num_cols; ++k) // Iterates over cols of first matrix
+                // Computes dot product of ith row of 1st matrix and jth col of 2nd matrix
+                {
+                    value += matrix[i * num_cols + k] * other_matrix[k * other.num_cols + j];
+                }
+                result_matrix[i * num_cols + j] = value;
+            }
+        }
+
+        return result;
+    }
+
     void T()
     {
         // create temporary matrix data
         UniqueResource<float> temp{new float[num_cols * num_rows], true};
 
-        // load matric pointers
+        // load matrix pointers
         auto *original_matrix = data.get();
         auto *new_matrix = temp.get();
 
@@ -232,6 +264,22 @@ int main()
     C.T();
     cout << "Transpose of Matrix C:" << endl;
     C.print();
+
+    cout << "-------------------------------" << endl;
+    cout << "Matrix Multiplication" << endl;
+    float *array_d = new float[4]{2.0, -2.0, 5.0, 3.0};
+    float *array_e = new float[4]{-1.0, 4.0, 7.0, -6.0};
+    Matrix D{2, 2, array_d};
+    Matrix E{2, 2, array_e};
+
+    cout << "Matrix D:" << endl;
+    D.print();
+    cout << "Matrix E:" << endl;
+    E.print();
+
+    Matrix F = D * E;
+    cout << "Result of D*E:" << endl;
+    F.print();
 
     return 0;
 }
