@@ -6,7 +6,6 @@ template <typename T>
 class UniqueResource
 {
 private:
-    // Add your member variables here
     T *ptr;
     bool is_array;
 
