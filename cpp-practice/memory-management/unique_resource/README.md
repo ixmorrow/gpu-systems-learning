@@ -17,7 +17,7 @@ cmake ..
 make
 ```
 
-## UniqueResource Implementation Project Outline (Claude)
+## UniqueResource Implementation Project Outline
 
 Requirements:
 1. Create a template class that manages a single resource
