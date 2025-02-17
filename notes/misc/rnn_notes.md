@@ -25,7 +25,7 @@ Three gates:
 
 GRU - Gated Recurrent Unit, combines the forget and input gates into a single “update gate.” It also merges the cell state and hidden state, and makes some other changes.
 
-Another potential improvement to make to RNNs: Attention! Let every step of an RNN pick information to look at from some larger collection of information
+Another potential improvement to make to RNNs: Attention! Let every step of an RNN pick information to look at from some larger collection of information.
 
 
 Sources:
